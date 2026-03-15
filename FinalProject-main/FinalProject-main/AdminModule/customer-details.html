@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Content</title>
+    <link rel="stylesheet" href="../UserModule/user.css" />
+    <link rel="stylesheet" href="../UserModule/layout/userNavigation.css" />
+    <style>
+      .main-container {
+        margin-top: 20px;
+      }
+      .content-wrapper,
+      .accounts-wrapper {
+        margin-bottom: 26px;
+      }
+      .table-container {
+        max-height: 360px;
+        overflow: auto;
+      }
+      .post-delete-btn {
+        background: #b0002d;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 7px 12px;
+        cursor: pointer;
+      }
+      .post-delete-btn:hover {
+        opacity: 0.9;
+      }
+      .customer-badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #f6e7ea;
+        color: #800020;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-top: 8px;
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+      }
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="logo">
+        <img src="../images/logo.png" alt="postpilot Logo" />
+        <p>PostPolit</p>
+      </div>
+
+      <input type="checkbox" id="menu-toggle" />
+
+      <label for="menu-toggle" class="menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+
+      <nav>
+        <ul>
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="../about_us.html">About</a></li>
+          <li><a href="../contact.html">Contact</a></li>
+          <li><a href="#content">Content</a></li>
+          <li><a href="../index.html" id="adminLogout">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="main-container">
+      <div class="content-wrapper" id="content">
+        <div class="content-header">
+          <div>
+            <h2>Content</h2>
+            <p id="customerSub">Manage all your social media content</p>
+            <span id="customerBadge" class="customer-badge"></span>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button id="openAnalytics" class="new-post-btn" style="background: #1877f2;">
+              Analytics
+            </button>
+            <button id="openModal" class="new-post-btn">+ New Post</button>
+          </div>
+        </div>
+
+        <div class="search-filter">
+          <input type="text" id="searchInput" placeholder="Search by Title or Date..." />
+        </div>
+
+        <div class="table-container">
+          <table class="content-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Platform</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="contentTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="accounts-wrapper">
+        <div class="accounts-header">
+          <div class="header-top">
+            <h2>Social Accounts</h2>
+            <span class="coming-soon-badge">Coming Soon....</span>
+          </div>
+          <p>Connect your Instagram and Facebook accounts</p>
+        </div>
+
+        <div class="accounts-container">
+          <div class="account-card">
+            <div class="account-left">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" />
+              <div>
+                <h3>Instagram</h3>
+                <p id="instaStatus">Not Connected</p>
+              </div>
+            </div>
+            <button class="connect-btn insta-btn" id="connectInstagramBtn">Connect</button>
+          </div>
+
+          <div class="account-card" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; width: 100%; align-items: center;">
+              <div class="account-left">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" style="width: 40px; height: 40px; margin-right: 15px;" alt="Facebook" />
+                <div>
+                  <h3>Facebook</h3>
+                  <p id="fbStatus">Connected (via Token)</p>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 15px; width: 100%;">
+              <label style="display: block; font-size: 12px; margin-bottom: 5px; color: #666;">Access Token (Replace if expired):</label>
+              <div style="display: flex; gap: 10px;">
+                <input type="password" id="fbAccessTokenInput" placeholder="Enter new Access Token" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" />
+                <button id="updateFbTokenBtn" style="padding: 8px 15px; background-color: #1877F2; color: white; border: none; border-radius: 4px; cursor: pointer;">Update</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="postModal" class="modal hidden">
+      <div class="modal-box">
+        <h2 id="popupTitle">Create New Post</h2>
+
+        <div class="form-group">
+          <label>Project Name</label>
+          <input type="text" id="project_name" placeholder="Enter project title" />
+        </div>
+
+        <div class="form-group">
+          <label>Caption</label>
+          <textarea id="project_caption" placeholder="Write caption..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Platform</label>
+            <select id="platform">
+              <option value="">Select Platform</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Both">On Both</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Status</label>
+            <select id="status">
+              <option value="Draft">Draft</option>
+              <option value="Scheduled">Scheduled</option>
+              <option value="Published">Published</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Schedule Date</label>
+          <input type="date" id="schedule_date" />
+        </div>
+
+        <div class="form-group">
+          <label>Notification Email</label>
+          <input type="email" id="notification_email" placeholder="ankitagkjha@gmail.com" value="ankitagkjha@gmail.com" />
+        </div>
+
+        <div class="form-group">
+          <label>Attachments (Image/Video)</label>
+          <input type="file" id="mediaUpload" accept="image/*,video/*" multiple />
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelBtn" class="btn-cancel">Cancel</button>
+          <button id="createBtn" class="btn-select">Create Post</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const currentHost = window.location.hostname || "localhost";
+      const API = `http://${currentHost}:3000`;
+      const params = new URLSearchParams(window.location.search);
+      const custId = params.get("custId");
+      const custName = decodeURIComponent(params.get("custName") || "");
+
+      if (!custId || !custName) {
+        alert("Invalid customer selection");
+        window.location.href = "./admin.html";
+      }
+
+      document.getElementById("customerSub").innerText =
+        "Manage all your social media content for this customer";
+      document.getElementById("customerBadge").innerText = custName;
+
+      const analyticsBtn = document.getElementById("openAnalytics");
+      if (analyticsBtn) {
+        analyticsBtn.addEventListener("click", function () {
+          const backTo = `../AdminModule/customer-details.html?custId=${encodeURIComponent(
+            custId
+          )}&custName=${encodeURIComponent(custName)}`;
+          window.location.href = `../UserModule/analytics.html?customer_name=${encodeURIComponent(
+            custName
+          )}&back=${encodeURIComponent(backTo)}`;
+        });
+      }
+
+      const savedToken = localStorage.getItem("fbAccessToken");
+      if (savedToken) {
+        document.getElementById("fbAccessTokenInput").value = savedToken;
+      }
+
+      function formatDate(date) {
+        if (!date) return "-";
+        return new Date(date).toLocaleDateString("en-GB");
+      }
+
+      async function loadContent() {
+        const table = document.getElementById("contentTable");
+        table.innerHTML = "";
+
+        try {
+          const res = await fetch(
+            API + "/posts?customer_name=" + encodeURIComponent(custName)
+          );
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            table.innerHTML =
+              "<tr><td colspan='5' style='text-align:center;'>No content available for this customer</td></tr>";
+            return;
+          }
+
+          data.forEach((post) => {
+            table.innerHTML += `
+              <tr>
+                <td>${post.title || "-"}</td>
+                <td>${post.platform || "-"}</td>
+                <td>${post.status || "-"}</td>
+                <td>${formatDate(post.schedule_date)}</td>
+                <td><button class="post-delete-btn" onclick="deletePost(${post.content_id})">Delete</button></td>
+              </tr>
+            `;
+          });
+        } catch (err) {
+          console.error("Load content failed:", err);
+          table.innerHTML =
+            "<tr><td colspan='5' style='text-align:center;'>Unable to load content (server not reachable)</td></tr>";
+        }
+      }
+
+      async function createPost() {
+        const title = document.getElementById("project_name").value.trim();
+        const caption = document.getElementById("project_caption").value.trim();
+        const platform = document.getElementById("platform").value;
+        const status = document.getElementById("status").value;
+        const date = document.getElementById("schedule_date").value;
+        const notification_email =
+          document.getElementById("notification_email").value.trim() ||
+          "ankitagkjha@gmail.com";
+        const mediaFiles = document.getElementById("mediaUpload").files;
+
+        if (!title || !platform || !date) {
+          alert("Please fill title, platform and schedule date.");
+          return;
+        }
+
+        const selectedDate = new Date(date);
+        const today = new Date();
+        selectedDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+          alert("Cannot schedule for a past date.");
+          return;
+        }
+
+        const payload = {
+          customer_name: custName,
+          title,
+          caption,
+          platform,
+          status,
+          post_date: date,
+          notification_email,
+        };
+
+        try {
+          let res;
+
+          if (mediaFiles && mediaFiles.length > 0) {
+            const formData = new FormData();
+            formData.append("customer_name", payload.customer_name);
+            formData.append("title", payload.title);
+            formData.append("caption", payload.caption);
+            formData.append("platform", payload.platform);
+            formData.append("status", payload.status);
+            formData.append("post_date", payload.post_date);
+            formData.append("notification_email", payload.notification_email);
+
+            Array.from(mediaFiles).forEach((file) => {
+              formData.append("media", file);
+            });
+
+            res = await fetch(API + "/addPostWithMedia", {
+              method: "POST",
+              body: formData,
+            });
+          } else {
+            res = await fetch(API + "/addPost", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+          }
+
+          const data = await res.json();
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          document.getElementById("project_name").value = "";
+          document.getElementById("project_caption").value = "";
+          document.getElementById("platform").value = "";
+          document.getElementById("status").value = "Draft";
+          document.getElementById("schedule_date").value = "";
+          document.getElementById("mediaUpload").value = "";
+
+          document.getElementById("postModal").classList.add("hidden");
+          loadContent();
+        } catch {
+          alert("Unable to save post.");
+        }
+      }
+
+      async function deletePost(postId) {
+        if (!confirm("Delete this post?")) return;
+
+        try {
+          await fetch(API + "/deletePost/" + postId, { method: "DELETE" });
+          loadContent();
+        } catch {
+          alert("Unable to delete post.");
+        }
+      }
+
+      document.getElementById("searchInput").addEventListener("input", function () {
+        const value = this.value.toLowerCase();
+        document.querySelectorAll("#contentTable tr").forEach((row) => {
+          row.style.display = row.innerText.toLowerCase().includes(value)
+            ? ""
+            : "none";
+        });
+      });
+
+      document.getElementById("openModal").onclick = function () {
+        document.getElementById("postModal").classList.remove("hidden");
+      };
+
+      document.getElementById("cancelBtn").onclick = function () {
+        document.getElementById("postModal").classList.add("hidden");
+      };
+
+      document.getElementById("createBtn").onclick = createPost;
+
+      document.getElementById("connectInstagramBtn").onclick = function () {
+        window.location.href = API + "/connectInstagram";
+      };
+
+      document.getElementById("updateFbTokenBtn").onclick = function () {
+        const token = document.getElementById("fbAccessTokenInput").value.trim();
+        if (!token) {
+          alert("Please enter a token");
+          return;
+        }
+        localStorage.setItem("fbAccessToken", token);
+        alert("Facebook Access Token updated.");
+      };
+
+      document.getElementById("connectFacebookBtn")?.addEventListener("click", () => {
+        window.location.href = API + "/connectFacebook";
+      });
+
+      document.getElementById("adminLogout").addEventListener("click", function (e) {
+        e.preventDefault();
+        localStorage.removeItem("adminLogged");
+        localStorage.removeItem("adminName");
+        window.location.href = "../index.html";
+      });
+
+      loadContent();
+    </script>
+  </body>
+</html>
